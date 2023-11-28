@@ -17,6 +17,14 @@ from openpyxl.utils.dataframe import dataframe_to_rows
 from openpyxl import load_workbook
 
 
+def select_values_subset(sample_df, value_col, team_col=None):
+    level_columns = ['l1', 'l2', 'l3', 'l4', 
+                     'l1_weight', 'l2_weight', 'l3_weight', 'l4_weight', 
+                     'direction', 'value_range']
+    if team_col:
+        level_columns.append(team_col)
+    return sample_df[level_columns + [value_col]]
+
 
 def read_sample_data_targets(data):
     ### TO DO: add data checks
