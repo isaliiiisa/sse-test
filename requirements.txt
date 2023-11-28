@@ -7,3 +7,4 @@ pyxlsb
 openpyxl
 xlsxwriter
 dill
+matplotlib
