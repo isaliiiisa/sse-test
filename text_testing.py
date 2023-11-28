@@ -191,7 +191,8 @@ if 'model_submitted' not in st.session_state:
 def main():
     st.set_page_config(layout="wide")
     selected_page = page_select()
-
+    if selected_page == "User Guide & Documentation":
+        st.write('tbd')
     if selected_page == "Model Training":
         
         
