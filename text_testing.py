@@ -375,12 +375,12 @@ def main():
             m = st.markdown("""
             <style>
             div.stButton > button:first-child {
-                background-color: #0099ff;
+                background-color: #00A9F4;
                 color:#ffffff;
             }
             div.stButton > button:hover {
-                background-color: #00ff00;
-                color:#ff0000;
+                background-color: #75F0E7;
+                color:#061F79
                 }
             </style>""", unsafe_allow_html=True)
             if st.button('Try with sample team'):
