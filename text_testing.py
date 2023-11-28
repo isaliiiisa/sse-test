@@ -369,6 +369,10 @@ def main():
                 
                 
         if selected_page == "Forecasting Outcomes":
+            st.markdown(""" div.stButton > button:first-child {
+background-color: #00cc00;color:white;font-size:20px;height:3em;width:30em;border-radius:10px 10px 10px 10px;
+}""", unsafe_allow_html=True)
+
             st.markdown("<h1 style='text-align: center; color: #031119;font-size:30px;'>Team metrics analysis & <br /> Outcomes forecasting</h1>", unsafe_allow_html=True)
             team_data = st.file_uploader("Upload team data for analysis")
             if st.button('Try with sample team'):
