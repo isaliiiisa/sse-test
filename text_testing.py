@@ -73,7 +73,7 @@ def md_text(text, style_block=style_block):
 
 def page_select():
         """Display a selectbox for page selection and return the selected page."""
-        pages = ["Model Training", "Forecasting Outcomes",  "User Guide & Documentation"]
+        pages = [ "Forecasting Outcomes", "Model Training", "User Guide & Documentation"]
         selected_page = st.selectbox("Choose a page", pages)
         return selected_page
     
