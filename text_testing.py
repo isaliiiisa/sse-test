@@ -420,7 +420,7 @@ def main():
                 
                 st.markdown('<span style="font-size:20px; color:#001d2d;">**2. Forecasted Outcomes:**</span>', unsafe_allow_html=True)
                 st.text('some stats on accuracy of model fit, etc.')
-                forecast_plot = plot_metrics(forecasted_outcomes)
+                forecast_plot = plot_forecasted_metrics(forecasted_outcomes)
                 st.plotly_chart(forecast_plot, theme="streamlit", use_container_width = True)
                 
                 
