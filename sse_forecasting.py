@@ -119,7 +119,7 @@ def create_color_mapping(agg_dfs_d):
     
 
 def load_model(outcome_metric):
-    model_filename =  f'sse_{outcome_metric.replace(" ", "_")}_model_trained.sav'
+    model_filename =  f'temp_sse_{outcome_metric.replace(" ", "_")}_model_trained.sav'
     trained_model = pickle.load(open(model_filename, 'rb'))
     return trained_model
 
