@@ -3,6 +3,34 @@ from sse_forecasting import *
 from sse_model_training import *
 from sse_ml_utils import *
     
+def check_password():
+    """Returns `True` if the user had the correct password."""
+
+    def password_entered():
+        """Checks whether a password entered by the user is correct."""
+        if st.session_state["password"] == st.secrets["password"]:
+            st.session_state["password_correct"] = True
+            del st.session_state["password"]  # don't store password
+        else:
+            st.session_state["password_correct"] = False
+
+    if "password_correct" not in st.session_state:
+        # First run, show input for password.
+        st.text_input(
+            "Password", type="password", on_change=password_entered, key="password"
+        )
+        return False
+    elif not st.session_state["password_correct"]:
+        # Password not correct, show input + error.
+        st.text_input(
+            "Password", type="password", on_change=password_entered, key="password"
+        )
+        st.error("😕 Password incorrect")
+        return False
+    else:
+        # Password correct.
+        return True
+
 
 style_block = """<style>
                         .header {
@@ -190,211 +218,212 @@ if 'model_submitted' not in st.session_state:
     
 def main():
     st.set_page_config(layout="wide")
-    selected_page = page_select()
-    if selected_page == "User Guide & Documentation":
-        st.write('tbd')
-    if selected_page == "Model Training":
-        
-        
-        st.markdown(f'<style>{css}</style>', unsafe_allow_html=True)
-        st.markdown("<h1 style='text-align: center; color: #031119;font-size:30px;'>Model Training</h1>", unsafe_allow_html=True)
-        #md_text(sample_text)
-        
-        
-        #with c1:
-        md_text('<span class="color-text">Core model stats:</span>')
-        c1, c2 = st.columns(2)
-        with c1:
-            st.text('')
-            st.text('')
-            #st.text('some trained model stats; R2, RMSE, sample size, etc')
-            #st.text(data)
-            beautiful_html_table = create_beautiful_html_table(data)
-            st.markdown(beautiful_html_table, unsafe_allow_html=True)
-            st.text('')
-            st.text('')
-            with open('importances_df.xlsx', 'rb') as my_file:
-                    st.download_button(label = 'Download Feature Importance Scores', data = my_file, file_name = 'feature_importances.xlsx', mime = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') 
-        with c2:
-            imp_data = pd.read_excel('importances_df.xlsx')
-            f_metric = st.selectbox("Select a metric", list(['team_health', 'speed', 'quality', 'efficiency']))
-            
-            imp_plot = create_imp_plot(f_metric, imp_data)
-            st.plotly_chart(imp_plot, theme="streamlit", use_container_width = True)
-             
-    # Display the HTML content in Streamlit
-        
-        
-        
-        st.markdown("<hr/>", unsafe_allow_html=True)
-        
-        
-        st.markdown('<span style="font-size:20px; color:#001d2d;">**To retrain the model:**</span>', unsafe_allow_html=True)
-        
-        
-        
-        c1, c2 = st.columns(2)
-        with c1:
-            with st.form("Train models"):
-                st.markdown('<span style="font-size:18px; color:#00a3f3;">**Step 1:**</span> <span style="font-size:16px;">Upload Outcomes and Capabilities data for model training </span><br> <span style="font-size: 30px;">📥</span>', unsafe_allow_html=True)
-        
-                training_X_file_uploaded = False
-                uploaded_training_X = st.file_uploader("Upload Capabilities Excel file for training")
-                if uploaded_training_X is not None:
-                    try:
-                        message, training_X = read_capabilities_df(uploaded_training_X)
-                        if message == "All good!":
-                            training_X_file_uploaded = True
-                        else:
-                            st.warning(message)
-                            training_X_file_uploaded = False
-                    except Exception as e: 
-                        st.text(e)
-                        training_X_file_uploaded = False
-                        st.warning("File should be in Excel format!")   
-
-                training_Y_file_uploaded = False
-                uploaded_training_Y = st.file_uploader("Upload Outcomes Excel file for training")
-                if uploaded_training_Y is not None:
-                    try:
-                        message, training_Y = read_outcomes_df(uploaded_training_Y)
-                        if message == "All good!": 
-                            training_Y_file_uploaded = True
-                        else:
-                            st.warning(message)
-                            training_Y_file_uploaded = False
-                    except Exception as e: 
-                        training_Y_file_uploaded = False
-                        st.warning("File should be in Excel format!")  
-
-                levels_mapping_d, weights_mapping_d, value_range_d, direction_d = read_data_template('metrics_template.xlsx')  
-                st.markdown('<span style="font-size:18px; color:#00a3f3;">**Step 2:**</span> <span style="font-size:16px;">Update Template file with Level weights and mapping (optional) </span><br> <span style="font-size: 30px;">📥</span>', unsafe_allow_html=True)
-                uploaded_template = st.file_uploader("Upload Template Excel file")
-                if uploaded_template is not None:
-                    try:
-                        levels_mapping_d, weights_mapping_d, value_range_d, direction_d = read_data_template(uploaded_template)
-                        uploaded_template = True
-                    except Exception as e: 
-                        uploaded_template = False
-                        st.warning("File should be in Excel format!")  
-
-
-                ready_to_train = False
-                if (training_Y_file_uploaded and training_X_file_uploaded):
-                    check1_m, check1 = outcomes_capabilities_match(training_X, training_Y)
-                    st.write(check1_m)
-                    if check1:
-                        check2_m, check2 = template_capabilities_match(training_X, levels_mapping_d)
-                        st.write(check2_m)
-                        if check2:
-                            df_cap = assign_weights_levels(training_X, levels_mapping_d, weights_mapping_d, value_range_d, direction_d)
-                            df_cap_pivot = preprocessing_pipeline(df_cap, 'value', team_col='team_id')
-                            ready_to_train = True
-                data_submitted = st.form_submit_button("Re-train the model")
-                    
-              
-        with c2:
-            st.write( st.session_state['model_submitted'] )
-            if data_submitted:
-                if ready_to_train:
-                    ### Running training pipeline
-                    modelling_stats_d = {}
-                    outcome_metrics_list = ['speed', 'quality', 'efficiency', 'team_health']
-                    outcome_metrics_list = ['speed', 'quality']
-                    if len(outcome_metrics_list)==1:
-                        outcome_metrics_list = [outcome_metrics_list]
-                    
-                    models_updated = {m:False for m in outcome_metrics_list}
-                    for outcome_metric in outcome_metrics_list:
-                        with st.spinner(f'Training {outcome_metric} model...'):
-
-                            df_outcome_selected = training_Y[['team_id', outcome_metric]]
-
-                            model_stats = model_training_workflow(df_cap_pivot, df_outcome_selected, outcome_metric, core=False)
-                            modelling_stats_d[outcome_metric] = model_stats
-                            
-                        st.success(f'{outcome_metric} model trained successfully')
-                        models_updated[outcome_metric] = True
-                      
-                    new_model_stats = create_beautiful_html_table(modelling_stats_d)
-                    st.markdown(new_model_stats, unsafe_allow_html=True)
-                    st.write('')
-                    if st.button('Update model'):
-                        st.session_state['model_submitted'] = True
-                        st.write('Core model has been updated')
-                          
-                        
-                        
-                else:
-                    st.write('not ready for re-train')
-                    
-            st.write('')    
-            if st.session_state['model_submitted']:
-                st.write('Core model has been updated')
-                
-                
-            #if st.button('Update Core Model'):
-                ### add update function
-             #   st.write('Core model has been updated')
-
+    if check_password():
+        selected_page = page_select()
+        if selected_page == "User Guide & Documentation":
+            st.write('tbd')
+        if selected_page == "Model Training":
             
             
-    if selected_page == "Forecasting Outcomes":
-        st.markdown("<h1 style='text-align: center; color: #031119;font-size:30px;'>Team metrics analysis & <br /> Outcomes forecasting</h1>", unsafe_allow_html=True)
-        team_data = st.file_uploader("Upload team data for analysis")
-        if team_data is not None:
-            ### Reading data
-            capabilities_df, outcomes_df = read_sample_data_targets(team_data)
-            sample_df  = capabilities_df.copy()
-            outcomes_d = prepare_outcomes_d(outcomes_df)
-
-            levels_mapping_d, weights_mapping_d, value_range_d, direction_d = read_data_template('metrics_template.xlsx')
-
-            ### Data preprocessing
-            sample_df = assign_weights_levels(sample_df, levels_mapping_d, weights_mapping_d, value_range_d, direction_d)
-
-
-            ### Lagging areas 
-            l3_lagging_d, l4_lagging_d = find_lagging_areas(sample_df, value_col, levels_mapping_d, weights_mapping_d)
-            fig = plot_pipeline(sample_df, value_col, levels_mapping_d, weights_mapping_d)
-            ### Saving table with scores
-            output_table = prepare_output_table(sample_df, value_col, levels_mapping_d, weights_mapping_d)
-            format_and_save_excel(output_table, 'current_scores_analysis.xlsx', value_col=value_col)
-            #wb = load_workbook()
+            st.markdown(f'<style>{css}</style>', unsafe_allow_html=True)
+            st.markdown("<h1 style='text-align: center; color: #031119;font-size:30px;'>Model Training</h1>", unsafe_allow_html=True)
+            #md_text(sample_text)
             
-
-            ### Forecasting 
-            l3_forecast = preprocessing_pipeline(sample_df, 'forecast_1')
-            l3_current  = preprocessing_pipeline(sample_df, 'value')
-
-            forecasted_outcomes = {}
-            for outcome in outcome_metrics_list:
-                model_uplift, current_outcome,  forecasted_outcome = forecast_uplift(outcome, outcomes_d, l3_current, l3_forecast)
-                forecasted_outcomes[outcome] = {"% uplift":model_uplift,
-                                                "current outcome":current_outcome,
-                                                "forecasted outcome":forecasted_outcome
-                                                }
-
-            st.markdown('<span style="font-size:20px; color:#001d2d;">**1. Current metrics analysis:**</span>', unsafe_allow_html=True)
-            c1, c2 = st.columns([3,2])
+            
+            #with c1:
+            md_text('<span class="color-text">Core model stats:</span>')
+            c1, c2 = st.columns(2)
             with c1:
-                  
-                
-                st.plotly_chart(fig, theme="streamlit", use_container_width = True)
+                st.text('')
+                st.text('')
+                #st.text('some trained model stats; R2, RMSE, sample size, etc')
+                #st.text(data)
+                beautiful_html_table = create_beautiful_html_table(data)
+                st.markdown(beautiful_html_table, unsafe_allow_html=True)
+                st.text('')
+                st.text('')
+                with open('importances_df.xlsx', 'rb') as my_file:
+                        st.download_button(label = 'Download Feature Importance Scores', data = my_file, file_name = 'feature_importances.xlsx', mime = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') 
             with c2:
-                st.markdown(generate_markdown(l3_lagging_d, l4_lagging_d), unsafe_allow_html=True)
-                st.markdown('')
-                with open('current_scores_analysis.xlsx', 'rb') as my_file:
-                    st.download_button(label = 'Download Full Analysis', data = my_file, file_name = 'scores_analysis.xlsx', mime = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')  
+                imp_data = pd.read_excel('importances_df.xlsx')
+                f_metric = st.selectbox("Select a metric", list(['team_health', 'speed', 'quality', 'efficiency']))
+                
+                imp_plot = create_imp_plot(f_metric, imp_data)
+                st.plotly_chart(imp_plot, theme="streamlit", use_container_width = True)
+                 
+        # Display the HTML content in Streamlit
+            
+            
+            
             st.markdown("<hr/>", unsafe_allow_html=True)
             
-            st.markdown('<span style="font-size:20px; color:#001d2d;">**2. Forecasted Outcomes:**</span>', unsafe_allow_html=True)
-            st.text('some stats on accuracy of model fit, etc.')
-            forecast_plot = plot_metrics(forecasted_outcomes)
-            st.plotly_chart(forecast_plot, theme="streamlit", use_container_width = True)
+            
+            st.markdown('<span style="font-size:20px; color:#001d2d;">**To retrain the model:**</span>', unsafe_allow_html=True)
             
             
-        
+            
+            c1, c2 = st.columns(2)
+            with c1:
+                with st.form("Train models"):
+                    st.markdown('<span style="font-size:18px; color:#00a3f3;">**Step 1:**</span> <span style="font-size:16px;">Upload Outcomes and Capabilities data for model training </span><br> <span style="font-size: 30px;">📥</span>', unsafe_allow_html=True)
+            
+                    training_X_file_uploaded = False
+                    uploaded_training_X = st.file_uploader("Upload Capabilities Excel file for training")
+                    if uploaded_training_X is not None:
+                        try:
+                            message, training_X = read_capabilities_df(uploaded_training_X)
+                            if message == "All good!":
+                                training_X_file_uploaded = True
+                            else:
+                                st.warning(message)
+                                training_X_file_uploaded = False
+                        except Exception as e: 
+                            st.text(e)
+                            training_X_file_uploaded = False
+                            st.warning("File should be in Excel format!")   
+    
+                    training_Y_file_uploaded = False
+                    uploaded_training_Y = st.file_uploader("Upload Outcomes Excel file for training")
+                    if uploaded_training_Y is not None:
+                        try:
+                            message, training_Y = read_outcomes_df(uploaded_training_Y)
+                            if message == "All good!": 
+                                training_Y_file_uploaded = True
+                            else:
+                                st.warning(message)
+                                training_Y_file_uploaded = False
+                        except Exception as e: 
+                            training_Y_file_uploaded = False
+                            st.warning("File should be in Excel format!")  
+    
+                    levels_mapping_d, weights_mapping_d, value_range_d, direction_d = read_data_template('metrics_template.xlsx')  
+                    st.markdown('<span style="font-size:18px; color:#00a3f3;">**Step 2:**</span> <span style="font-size:16px;">Update Template file with Level weights and mapping (optional) </span><br> <span style="font-size: 30px;">📥</span>', unsafe_allow_html=True)
+                    uploaded_template = st.file_uploader("Upload Template Excel file")
+                    if uploaded_template is not None:
+                        try:
+                            levels_mapping_d, weights_mapping_d, value_range_d, direction_d = read_data_template(uploaded_template)
+                            uploaded_template = True
+                        except Exception as e: 
+                            uploaded_template = False
+                            st.warning("File should be in Excel format!")  
+    
+    
+                    ready_to_train = False
+                    if (training_Y_file_uploaded and training_X_file_uploaded):
+                        check1_m, check1 = outcomes_capabilities_match(training_X, training_Y)
+                        st.write(check1_m)
+                        if check1:
+                            check2_m, check2 = template_capabilities_match(training_X, levels_mapping_d)
+                            st.write(check2_m)
+                            if check2:
+                                df_cap = assign_weights_levels(training_X, levels_mapping_d, weights_mapping_d, value_range_d, direction_d)
+                                df_cap_pivot = preprocessing_pipeline(df_cap, 'value', team_col='team_id')
+                                ready_to_train = True
+                    data_submitted = st.form_submit_button("Re-train the model")
+                        
+                  
+            with c2:
+                st.write( st.session_state['model_submitted'] )
+                if data_submitted:
+                    if ready_to_train:
+                        ### Running training pipeline
+                        modelling_stats_d = {}
+                        outcome_metrics_list = ['speed', 'quality', 'efficiency', 'team_health']
+                        outcome_metrics_list = ['speed', 'quality']
+                        if len(outcome_metrics_list)==1:
+                            outcome_metrics_list = [outcome_metrics_list]
+                        
+                        models_updated = {m:False for m in outcome_metrics_list}
+                        for outcome_metric in outcome_metrics_list:
+                            with st.spinner(f'Training {outcome_metric} model...'):
+    
+                                df_outcome_selected = training_Y[['team_id', outcome_metric]]
+    
+                                model_stats = model_training_workflow(df_cap_pivot, df_outcome_selected, outcome_metric, core=False)
+                                modelling_stats_d[outcome_metric] = model_stats
+                                
+                            st.success(f'{outcome_metric} model trained successfully')
+                            models_updated[outcome_metric] = True
+                          
+                        new_model_stats = create_beautiful_html_table(modelling_stats_d)
+                        st.markdown(new_model_stats, unsafe_allow_html=True)
+                        st.write('')
+                        if st.button('Update model'):
+                            st.session_state['model_submitted'] = True
+                            st.write('Core model has been updated')
+                              
+                            
+                            
+                    else:
+                        st.write('not ready for re-train')
+                        
+                st.write('')    
+                if st.session_state['model_submitted']:
+                    st.write('Core model has been updated')
+                    
+                    
+                #if st.button('Update Core Model'):
+                    ### add update function
+                 #   st.write('Core model has been updated')
+    
+                
+                
+        if selected_page == "Forecasting Outcomes":
+            st.markdown("<h1 style='text-align: center; color: #031119;font-size:30px;'>Team metrics analysis & <br /> Outcomes forecasting</h1>", unsafe_allow_html=True)
+            team_data = st.file_uploader("Upload team data for analysis")
+            if team_data is not None:
+                ### Reading data
+                capabilities_df, outcomes_df = read_sample_data_targets(team_data)
+                sample_df  = capabilities_df.copy()
+                outcomes_d = prepare_outcomes_d(outcomes_df)
+    
+                levels_mapping_d, weights_mapping_d, value_range_d, direction_d = read_data_template('metrics_template.xlsx')
+    
+                ### Data preprocessing
+                sample_df = assign_weights_levels(sample_df, levels_mapping_d, weights_mapping_d, value_range_d, direction_d)
+    
+    
+                ### Lagging areas 
+                l3_lagging_d, l4_lagging_d = find_lagging_areas(sample_df, value_col, levels_mapping_d, weights_mapping_d)
+                fig = plot_pipeline(sample_df, value_col, levels_mapping_d, weights_mapping_d)
+                ### Saving table with scores
+                output_table = prepare_output_table(sample_df, value_col, levels_mapping_d, weights_mapping_d)
+                format_and_save_excel(output_table, 'current_scores_analysis.xlsx', value_col=value_col)
+                #wb = load_workbook()
+                
+    
+                ### Forecasting 
+                l3_forecast = preprocessing_pipeline(sample_df, 'forecast_1')
+                l3_current  = preprocessing_pipeline(sample_df, 'value')
+    
+                forecasted_outcomes = {}
+                for outcome in outcome_metrics_list:
+                    model_uplift, current_outcome,  forecasted_outcome = forecast_uplift(outcome, outcomes_d, l3_current, l3_forecast)
+                    forecasted_outcomes[outcome] = {"% uplift":model_uplift,
+                                                    "current outcome":current_outcome,
+                                                    "forecasted outcome":forecasted_outcome
+                                                    }
+    
+                st.markdown('<span style="font-size:20px; color:#001d2d;">**1. Current metrics analysis:**</span>', unsafe_allow_html=True)
+                c1, c2 = st.columns([3,2])
+                with c1:
+                      
+                    
+                    st.plotly_chart(fig, theme="streamlit", use_container_width = True)
+                with c2:
+                    st.markdown(generate_markdown(l3_lagging_d, l4_lagging_d), unsafe_allow_html=True)
+                    st.markdown('')
+                    with open('current_scores_analysis.xlsx', 'rb') as my_file:
+                        st.download_button(label = 'Download Full Analysis', data = my_file, file_name = 'scores_analysis.xlsx', mime = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')  
+                st.markdown("<hr/>", unsafe_allow_html=True)
+                
+                st.markdown('<span style="font-size:20px; color:#001d2d;">**2. Forecasted Outcomes:**</span>', unsafe_allow_html=True)
+                st.text('some stats on accuracy of model fit, etc.')
+                forecast_plot = plot_metrics(forecasted_outcomes)
+                st.plotly_chart(forecast_plot, theme="streamlit", use_container_width = True)
+                
+                
+            
         
 if __name__ == "__main__":
     main()
