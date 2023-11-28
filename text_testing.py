@@ -369,10 +369,20 @@ def main():
                 
                 
         if selected_page == "Forecasting Outcomes":
-            st.markdown("""div.stButton > button:first-child {background-color: #00cc00;color:white;font-size:20px;height:3em;width:30em;border-radius:10px 10px 10px 10px;}""", unsafe_allow_html=True)
 
-            st.markdown("<h1 style='text-align: center; color: #031119;font-size:30px;'>Team metrics analysis & <br /> Outcomes forecasting</h1>", unsafe_allow_html=True)
             team_data = st.file_uploader("Upload team data for analysis")
+            st.text('')
+            m = st.markdown("""
+            <style>
+            div.stButton > button:first-child {
+                background-color: #0099ff;
+                color:#ffffff;
+            }
+            div.stButton > button:hover {
+                background-color: #00ff00;
+                color:#ff0000;
+                }
+            </style>""", unsafe_allow_html=True)
             if st.button('Try with sample team'):
                 team_data = 'sample_team.xlsx'
             if team_data is not None:
