@@ -329,7 +329,7 @@ def main():
                         ### Running training pipeline
                         modelling_stats_d = {}
                         outcome_metrics_list = ['speed', 'quality', 'efficiency', 'team_health']
-                        outcome_metrics_list = ['speed', 'quality']
+                        
                         if len(outcome_metrics_list)==1:
                             outcome_metrics_list = [outcome_metrics_list]
                         
@@ -397,6 +397,7 @@ def main():
                 l3_current  = preprocessing_pipeline(sample_df, 'value')
     
                 forecasted_outcomes = {}
+                outcome_metrics_list = ['speed', 'quality', 'efficiency', 'team_health']
                 for outcome in outcome_metrics_list:
                     model_uplift, current_outcome,  forecasted_outcome = forecast_uplift(outcome, outcomes_d, l3_current, l3_forecast)
                     forecasted_outcomes[outcome] = {"% uplift":model_uplift,
