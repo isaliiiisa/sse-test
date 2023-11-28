@@ -323,7 +323,7 @@ def main():
                         
                   
             with c2:
-                st.write( st.session_state['model_submitted'] )
+                #st.write( st.session_state['model_submitted'] )
                 if data_submitted:
                     if ready_to_train:
                         ### Running training pipeline
