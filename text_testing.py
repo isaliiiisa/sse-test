@@ -371,6 +371,8 @@ def main():
         if selected_page == "Forecasting Outcomes":
             st.markdown("<h1 style='text-align: center; color: #031119;font-size:30px;'>Team metrics analysis & <br /> Outcomes forecasting</h1>", unsafe_allow_html=True)
             team_data = st.file_uploader("Upload team data for analysis")
+            if st.button('Try with sample team'):
+                team_data = 'sample_team.xlsx'
             if team_data is not None:
                 ### Reading data
                 capabilities_df, outcomes_df = read_sample_data_targets(team_data)
