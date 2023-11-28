@@ -9,3 +9,4 @@ xlsxwriter
 dill
 matplotlib
 catboost
+shap
