@@ -241,15 +241,16 @@ def main():
                 beautiful_html_table = create_beautiful_html_table(data)
                 st.markdown(beautiful_html_table, unsafe_allow_html=True)
                 st.text('')
-                st.text('')
-                with open('importances_df.xlsx', 'rb') as my_file:
-                        st.download_button(label = 'Download Feature Importance Scores', data = my_file, file_name = 'feature_importances.xlsx', mime = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') 
+                
             with c2:
                 imp_data = pd.read_excel('importances_df.xlsx')
                 f_metric = st.selectbox("Select a metric", list(['team_health', 'speed', 'quality', 'efficiency']))
                 
                 imp_plot = create_imp_plot(f_metric, imp_data)
                 st.plotly_chart(imp_plot, theme="streamlit", use_container_width = True)
+                st.text('')
+                with open('importances_df.xlsx', 'rb') as my_file:
+                        st.download_button(label = 'Download Feature Importance Scores', data = my_file, file_name = 'feature_importances.xlsx', mime = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') 
                  
         # Display the HTML content in Streamlit
             
@@ -348,7 +349,18 @@ def main():
                         new_model_stats = create_beautiful_html_table(modelling_stats_d)
                         st.markdown(new_model_stats, unsafe_allow_html=True)
                         st.write('')
-                        if st.button('Update model'):
+                        m = st.markdown("""
+                        <style>
+                        div.stButton > button:first-child {
+                            background-color: #00A9F4;
+                            color:#ffffff;
+                        }
+                        div.stButton > button:hover {
+                            background-color: #75F0E7;
+                            color:#061F79
+                            }
+                        </style>""", unsafe_allow_html=True)
+                        if st.button('Update Core model'):
                             st.session_state['model_submitted'] = True
                             st.write('Core model has been updated')
                               
