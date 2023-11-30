@@ -128,7 +128,7 @@ def load_model(outcome_metric):
 def make_sunburst_chart(sample_df, color_mapping):
     ### Fix hover template
     ### Add legend
-    fig = px.sunburst(sample_df, path=['l0', 'l1', 'l2', 'l3'],
+    fig = px.sunburst(sample_df, path=['l0', 'l1', 'l2', 'l3', 'l4'],
                       values='w_multiplied',
                       )
     fig.update_traces(marker_colors=[color_mapping[cat] for cat in fig.data[-1].labels])
