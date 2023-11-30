@@ -132,7 +132,7 @@ def make_sunburst_chart(sample_df, color_mapping):
     ### Fix hover template
     ### Add legend
     for c in ['l0', 'l1', 'l2', 'l3', 'l4']:
-        sample_df[c] = sample_df[c].apply(customwrap)
+        sample_df[c] = sample_df[c].map(customwrap)
     fig = px.sunburst(sample_df, path=['l0', 'l1', 'l2', 'l3', 'l4'],
                       values='w_multiplied',
                       )
