@@ -131,11 +131,20 @@ def load_model(outcome_metric):
 def make_sunburst_chart(sample_df, color_mapping):
     ### Fix hover template
     ### Add legend
-    for c in ['l0', 'l1', 'l2', 'l3', 'l4']:
-        sample_df[c] = sample_df[c].map(customwrap)
-    fig = px.sunburst(sample_df, path=['l0', 'l1', 'l2', 'l3', 'l4'],
+    L0 = sample_df.l0.map(customwrap)
+    L1 = sample_df.l1.map(customwrap)
+    L2 = sample_df.l2.map(customwrap)
+    L3 = sample_df.l3.map(customwrap)
+    L4 = sample_df.l4.map(customwrap)
+    my_values = sample_df.Values
+
+    df = pd.DataFrame(dict(L0=L0, L1=L1, L2=L2, L3=L3, L4=L4, my_values=my_values) ) 
+    fig = px.sunburst(df, path=['L0', 'L1', 'L2', 'L3', 'L4'],
                       values='w_multiplied',
-                      )
+                      )                       
+    # fig = px.sunburst(sample_df, path=['l0', 'l1', 'l2', 'l3', 'l4'],
+    #                   values='w_multiplied',
+    #                   )
     fig.update_traces(marker_colors=[color_mapping[cat] for cat in fig.data[-1].labels])
     fig.update_layout(margin=dict(l=0, r=0, t=20, b=0))
     fig.update_layout(
