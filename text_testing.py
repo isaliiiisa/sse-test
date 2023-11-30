@@ -99,16 +99,17 @@ def generate_markdown(l3_lagging_d, l4_lagging_d):
     }
 
     # Main header with reduced line height
-    markdown_text = "<h1 style='font-size: 18px; line-height: 1;'>Lagging Metrics</h1>\n\n"
+    markdown_text = "<h1 style='font-size: 16px; line-height: 1;'>Lagging Metrics</h1>\n\n"
+    markdown_text += f"Based on the current state, we have identified 5 key lagging areas of SEE Capabilities:"
     for key, color in l3_lagging_d.items():
         # L3 header with specific color and reduced line height
-        markdown_text += f"<h2 style='font-size: 16px; color:{color_map[color]}; line-height: 1;'>{key}</h2>\n"
+        markdown_text += f"<h2 style='font-size: 14px; color:{color_map[color]}; line-height: 0.8;'>{key}</h2>\n"
 
         if key in l4_lagging_d:
-            markdown_text += "<div style='margin-left: 18px;'>\n"  # Increased indentation for L4 metrics
+            markdown_text += "<div style='margin-left: 18px; line-height: 0.6'>\n"  # Increased indentation for L4 metrics
             for subkey, subcolor in l4_lagging_d[key].items():
                 # L4 entry with specific colored dot and reduced line height
-                markdown_text += f"<span style='color:{color_map[subcolor]}; font-size: 15px; line-height: 1;'>●</span> {subkey}<br>\n"
+                markdown_text += f"<span style='color:{color_map[subcolor]}; font-size: 15px; line-height: 0.8;'>●</span> {subkey}<br>\n"
             markdown_text += "</div>\n"
 
     return markdown_text
@@ -432,6 +433,10 @@ def main():
                                                     }
     
                 st.markdown('<span style="font-size:20px; color:#001d2d;">**1. Current metrics analysis:**</span>', unsafe_allow_html=True)
+                st.text('Placeholder for general information on the analyzed team')
+                st.text('Missing values, outliers, etc.')
+
+                
                 c1, c2 = st.columns([3,2])
                 with c1:
                       
@@ -452,6 +457,7 @@ def main():
                 with c2:
                     forecast_plot = plot_forecasted_metrics(forecasted_outcomes)
                     st.plotly_chart(forecast_plot, theme="streamlit", use_container_width = True)
+                    st.button('Download detailed forecast')
                 
                 
             
