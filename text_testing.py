@@ -103,13 +103,13 @@ def generate_markdown(l3_lagging_d, l4_lagging_d):
     markdown_text += f"Based on the current state, we have identified 5 key lagging areas of SEE Capabilities:"
     for key, color in l3_lagging_d.items():
         # L3 header with specific color and reduced line height
-        markdown_text += f"<h2 style='font-size: 16px; color:{color_map[color]}; line-height: 1;'>{key}</h2>\n"
+        markdown_text += f"<h2 style='font-size: 16px; color:{color_map[color]}'>{key}</h2>\n"
 
         if key in l4_lagging_d:
             markdown_text += "<div style='margin-left: 18px; line-height: 1'>\n"  # Increased indentation for L4 metrics
             for subkey, subcolor in l4_lagging_d[key].items():
                 # L4 entry with specific colored dot and reduced line height
-                markdown_text += f"<span style='color:{color_map[subcolor]}; font-size: 15px; line-height: 1;'>●</span> {subkey}<br>\n"
+                markdown_text += f"<span style='color:{color_map[subcolor]}; font-size: 15px; line-height: 1.2;'>●</span> {subkey}<br>\n"
             markdown_text += "</div>\n"
 
     return markdown_text
