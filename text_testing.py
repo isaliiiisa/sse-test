@@ -445,9 +445,13 @@ def main():
                 st.markdown("<hr/>", unsafe_allow_html=True)
                 
                 st.markdown('<span style="font-size:20px; color:#001d2d;">**2. Forecasted Outcomes:**</span>', unsafe_allow_html=True)
-                st.text('some stats on accuracy of model fit, etc.')
-                forecast_plot = plot_forecasted_metrics(forecasted_outcomes)
-                st.plotly_chart(forecast_plot, theme="streamlit", use_container_width = True)
+
+                c1, c2 = st.columns([2,3])
+                with c1:
+                    st.text('some stats on accuracy of model fit, etc.')
+                with c2:
+                    forecast_plot = plot_forecasted_metrics(forecasted_outcomes)
+                    st.plotly_chart(forecast_plot, theme="streamlit", use_container_width = True)
                 
                 
             
