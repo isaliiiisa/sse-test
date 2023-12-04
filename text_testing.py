@@ -424,12 +424,18 @@ def main():
                 l3_current  = preprocessing_pipeline(sample_df, 'value')
     
                 forecasted_outcomes = {}
+                forecasted_outcomes2 = {}
                 outcome_metrics_list = ['speed', 'quality', 'efficiency', 'team_health']
                 for outcome in outcome_metrics_list:
                     model_uplift, current_outcome,  forecasted_outcome = forecast_uplift(outcome, outcomes_d, l3_current, l3_forecast)
+                    model_uplift2, current_outcome2,  forecasted_outcome2 = forecast_uplift2(outcome, outcomes_d, l3_current, l3_forecast)
                     forecasted_outcomes[outcome] = {"% uplift":model_uplift,
                                                     "current outcome":current_outcome,
                                                     "forecasted outcome":forecasted_outcome
+                                                    }
+                    forecasted_outcomes2[outcome] = {"% uplift":model_uplift2,
+                                                    "current outcome":current_outcome2,
+                                                    "forecasted outcome":forecasted_outcome2
                                                     }
     
                 st.markdown('<span style="font-size:20px; color:#001d2d;">**1. Current metrics analysis:**</span>', unsafe_allow_html=True)
@@ -463,7 +469,7 @@ def main():
                     with c1:
                         st.text('some stats on Forecast 2: which metrics are affected, accuracy of model fit, etc.')
                     with c2:
-                        forecast_plot2 = plot_forecasted_metrics2(forecasted_outcomes)
+                        forecast_plot2 = plot_forecasted_metrics(forecasted_outcomes_2)
                         st.plotly_chart(forecast_plot2, theme="streamlit", use_container_width = True)
                         
 
