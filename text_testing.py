@@ -469,7 +469,7 @@ def main():
                     with c1:
                         st.text('some stats on Forecast 2: which metrics are affected, accuracy of model fit, etc.')
                     with c2:
-                        forecast_plot2 = plot_forecasted_metrics(forecasted_outcomes_2)
+                        forecast_plot2 = plot_forecasted_metrics(forecasted_outcomes2)
                         st.plotly_chart(forecast_plot2, theme="streamlit", use_container_width = True)
                         
 
