@@ -267,6 +267,22 @@ def plot_pipeline(df, value, levels_mapping_d, weights_mapping_d):
     return fig
 
 
+def forecast_uplift2(outcome_metric, real_values, df_current, df_forecast):
+    ### Model predictions
+    uplift_mapping = {'speed':1.2, 'team_health':1.3, 'quality':1.02, 'efficiency':1.06}
+    trained_model = load_model(outcome_metric)
+
+    current_model_predicted = trained_model.predict(df_current)[0]
+    forecast_model_predicted = trained_model.predict(df_forecast)[0]*uplift_mapping[outcome_metric]
+    model_uplift = 100 * (forecast_model_predicted/ current_model_predicted - 1)
+    
+    ### Actual data
+    current_outcome = real_values[outcome_metric]
+    forecasted_outcome = current_outcome * (1 + model_uplift/100)
+    
+    ### model_error =  ((current_model_predicted - current_outcome) / current_model_predicted) * 100
+    return model_uplift, current_outcome, forecasted_outcome #, model_error
+
 
 def forecast_uplift(outcome_metric, real_values, df_current, df_forecast):
     ### Model predictions
